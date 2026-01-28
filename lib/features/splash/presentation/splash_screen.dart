@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:knot/core/theme/app_colors.dart';
+import 'package:knot/core/utils/constants.dart';
 import 'package:knot/features/welcome/presentation/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -69,16 +72,16 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFF000000), // Deep black background
+          color: AppColors.backgroundDark,
           gradient: RadialGradient(
-            center: Alignment.center, // Center gradient for splash
+            center: Alignment.center,
             radius: 1.2,
-            colors: [
-              Color(0xFF1A1A2E), // Deep purple/blue hint
-              Color(0xFF000000), // Black outer
-            ],
+            colors: [AppColors.backgroundPurple, AppColors.backgroundDark],
             stops: [0.0, 1.0],
           ),
         ),
@@ -93,26 +96,31 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Glowing Logo
+                      // Glowing Logo with animated glow
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withValues(
-                                alpha: 0.2 + (_controller.value * 0.2),
-                              ), // Pulse glow intensity
+                              color: AppColors.glowBlue.withValues(
+                                alpha:
+                                    AppConstants.opacityMedium +
+                                    (_controller.value *
+                                        AppConstants.opacityMedium),
+                              ),
                               blurRadius:
-                                  80 + (_controller.value * 20), // Pulse blur
+                                  AppConstants.glowBlurSmall.r +
+                                  (_controller.value * 20.r),
                               spreadRadius:
-                                  10 + (_controller.value * 10), // Pulse spread
+                                  AppConstants.glowSpreadSmall.r +
+                                  (_controller.value * 10.r),
                             ),
                           ],
                         ),
                         child: Image.asset(
                           'assets/images/knot_glow.png',
-                          width: 160,
-                          height: 160,
+                          width: AppConstants.logoSizeMedium.w,
+                          height: AppConstants.logoSizeMedium.h,
                         ),
                       ),
                     ],

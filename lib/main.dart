@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:knot/core/theme/app_theme.dart';
 import 'package:knot/features/splash/presentation/splash_screen.dart';
 
 void main() {
@@ -11,17 +13,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Knot',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
+    return ScreenUtilInit(
+      designSize: const Size(375, 812), // iPhone 11 Pro size as base
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Knot',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.darkTheme,
+          home: child,
+        );
+      },
+      child: const SplashScreen(),
     );
   }
 }
