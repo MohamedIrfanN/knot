@@ -9,11 +9,50 @@ import 'package:knot/core/widgets/gradient_text.dart';
 import 'package:knot/features/relays/presentation/widgets/relay_card.dart';
 
 /// Relays management screen
-class RelaysScreen extends ConsumerWidget {
+class RelaysScreen extends ConsumerStatefulWidget {
   const RelaysScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RelaysScreen> createState() => _RelaysScreenState();
+}
+
+class _RelaysScreenState extends ConsumerState<RelaysScreen>
+    with SingleTickerProviderStateMixin {
+  bool _isEditMode = false;
+  late AnimationController _editModeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _editModeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _editModeController.dispose();
+    super.dispose();
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      _isEditMode = !_isEditMode;
+      if (_isEditMode) {
+        _editModeController.forward();
+      } else {
+        _editModeController.reverse();
+      }
+    });
+  }
+
+  void _deleteRelay(String id) {
+    ref.read(relaysProvider.notifier).removeRelay(id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final relays = ref.watch(relaysProvider);
 
     return Scaffold(
@@ -32,11 +71,22 @@ class RelaysScreen extends ConsumerWidget {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: AppColors.white),
-            onPressed: () {
-              // TODO: Implement edit mode
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return RotationTransition(
+                turns: animation,
+                child: FadeTransition(opacity: animation, child: child),
+              );
             },
+            child: IconButton(
+              key: ValueKey(_isEditMode),
+              icon: Icon(
+                _isEditMode ? Icons.check : Icons.edit_outlined,
+                color: _isEditMode ? Colors.green : AppColors.white,
+              ),
+              onPressed: _toggleEditMode,
+            ),
           ),
         ],
       ),
@@ -58,47 +108,55 @@ class RelaysScreen extends ConsumerWidget {
                 ),
 
                 // Add Button
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryButtonGradient,
-                    borderRadius: BorderRadius.circular(20.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.gradientViolet.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        // TODO: Implement add relay
-                      },
+                AnimatedOpacity(
+                  opacity: _isEditMode ? 0.5 : 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryButtonGradient,
                       borderRadius: BorderRadius.circular(20.r),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.gradientViolet.withValues(
+                            alpha: 0.3,
+                          ),
+                          blurRadius: 8,
+                          spreadRadius: 1,
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.add,
-                              size: 18.sp,
-                              color: AppColors.white,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              'Add Relay',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isEditMode
+                            ? null
+                            : () {
+                                // TODO: Implement add relay
+                              },
+                        borderRadius: BorderRadius.circular(20.r),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add,
+                                size: 18.sp,
                                 color: AppColors.white,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add Relay',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -117,11 +175,19 @@ class RelaysScreen extends ConsumerWidget {
               itemCount: relays.length,
               itemBuilder: (context, index) {
                 final relay = relays[index];
-                return RelayCard(
-                  relay: relay,
-                  onTap: () {
-                    // TODO: Show relay details
-                  },
+                return AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: RelayCard(
+                    key: ValueKey(relay.id),
+                    relay: relay,
+                    isEditMode: _isEditMode,
+                    editModeAnimation: _editModeController,
+                    onTap: () {
+                      // TODO: Show relay details
+                    },
+                    onDelete: () => _deleteRelay(relay.id),
+                  ),
                 );
               },
             ),
