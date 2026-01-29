@@ -4,6 +4,7 @@ import 'package:knot/core/theme/app_colors.dart';
 import 'package:knot/core/theme/app_text_styles.dart';
 import 'package:knot/core/utils/constants.dart';
 import 'package:knot/core/widgets/gradient_text.dart';
+import 'package:knot/features/profile/presentation/profile_screen.dart';
 
 /// Reusable app drawer/sidebar
 class AppDrawer extends StatelessWidget {
@@ -65,15 +66,23 @@ class AppDrawer extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   children: [
                     _buildMenuItem(
-                      icon: Icons.home_outlined,
-                      title: 'Home',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _buildMenuItem(
                       icon: Icons.person_outline,
                       title: 'Profile',
                       onTap: () {
-                        // TODO: Navigate to profile
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      icon: Icons.cell_tower_rounded,
+                      title: 'Relays',
+                      onTap: () {
+                        // TODO: Navigate to about
                         Navigator.pop(context);
                       },
                     ),
