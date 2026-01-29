@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:knot/core/providers/auth_provider.dart';
 import 'package:knot/core/theme/app_colors.dart';
 import 'package:knot/core/theme/app_text_styles.dart';
 import 'package:knot/core/utils/constants.dart';
@@ -11,14 +13,14 @@ import 'package:knot/core/widgets/gradient_text.dart';
 import 'package:knot/features/auth/presentation/signup_screen.dart';
 import 'package:knot/features/home/presentation/home_screen.dart';
 
-class SigninScreen extends StatefulWidget {
+class SigninScreen extends ConsumerStatefulWidget {
   const SigninScreen({super.key});
 
   @override
-  State<SigninScreen> createState() => _SigninScreenState();
+  ConsumerState<SigninScreen> createState() => _SigninScreenState();
 }
 
-class _SigninScreenState extends State<SigninScreen> {
+class _SigninScreenState extends ConsumerState<SigninScreen> {
   final _formKey = GlobalKey<FormState>();
   final _privateKeyController = TextEditingController();
   bool _obscureText = true;
@@ -112,16 +114,19 @@ class _SigninScreenState extends State<SigninScreen> {
               // Sign In Button
               GradientButton(
                 text: 'Sign In',
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: Implement signin logic
-                    // Navigate to home screen
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
+                    await ref
+                        .read(authProvider.notifier)
+                        .signIn(privateKey: _privateKeyController.text);
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    }
                   }
                 },
               ),

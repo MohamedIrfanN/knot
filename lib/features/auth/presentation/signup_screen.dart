@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:knot/core/providers/auth_provider.dart';
 import 'package:knot/core/theme/app_colors.dart';
 import 'package:knot/core/theme/app_text_styles.dart';
 import 'package:knot/core/utils/constants.dart';
@@ -10,14 +12,14 @@ import 'package:knot/core/widgets/gradient_text.dart';
 import 'package:knot/features/auth/presentation/signin_screen.dart';
 import 'package:knot/features/home/presentation/home_screen.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
@@ -92,16 +94,22 @@ class _SignupScreenState extends State<SignupScreen> {
               // Signup Button
               GradientButton(
                 text: 'Sign Up',
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: Implement signup logic
-                    // Navigate to home screen
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
+                    await ref
+                        .read(authProvider.notifier)
+                        .signUp(
+                          name: _nameController.text,
+                          bio: _bioController.text,
+                        );
+                    if (mounted) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    }
                   }
                 },
               ),
