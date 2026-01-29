@@ -8,6 +8,7 @@ import 'package:knot/core/widgets/custom_text_field.dart';
 import 'package:knot/core/widgets/gradient_button.dart';
 import 'package:knot/core/widgets/gradient_text.dart';
 import 'package:knot/features/auth/presentation/signin_screen.dart';
+import 'package:knot/features/home/presentation/home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -94,6 +95,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     // TODO: Implement signup logic
+                    // Navigate to home screen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeScreen(),
+                      ),
+                    );
                   }
                 },
               ),
