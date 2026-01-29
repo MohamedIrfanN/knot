@@ -6,6 +6,7 @@ import 'package:knot/core/theme/app_colors.dart';
 import 'package:knot/core/theme/app_text_styles.dart';
 import 'package:knot/core/utils/constants.dart';
 import 'package:knot/core/widgets/gradient_text.dart';
+import 'package:knot/features/relays/presentation/widgets/add_relay_bottom_sheet.dart';
 import 'package:knot/features/relays/presentation/widgets/relay_card.dart';
 
 /// Relays management screen
@@ -49,6 +50,62 @@ class _RelaysScreenState extends ConsumerState<RelaysScreen>
 
   void _deleteRelay(String id) {
     ref.read(relaysProvider.notifier).removeRelay(id);
+  }
+
+  void _showAddRelaySheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddRelayBottomSheet(
+        onAddRelay: (url) {
+          // Extract relay name from URL
+          String name = _extractRelayName(url);
+
+          // Create new relay
+          final newRelay = Relay(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            name: name,
+            url: url,
+            status: RelayStatus.connecting,
+          );
+
+          // Add to provider
+          ref.read(relaysProvider.notifier).addRelay(newRelay);
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Relay "$name" added successfully'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _extractRelayName(String url) {
+    // Remove protocol
+    String name = url.replaceAll('wss://', '').replaceAll('ws://', '');
+
+    // Remove path
+    if (name.contains('/')) {
+      name = name.split('/')[0];
+    }
+
+    // Remove 'relay.' prefix if exists
+    if (name.startsWith('relay.')) {
+      name = name.substring(6);
+    }
+
+    // Capitalize first letter
+    if (name.isNotEmpty) {
+      name = name[0].toUpperCase() + name.substring(1);
+    }
+
+    return name;
   }
 
   @override
@@ -128,11 +185,7 @@ class _RelaysScreenState extends ConsumerState<RelaysScreen>
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: _isEditMode
-                            ? null
-                            : () {
-                                // TODO: Implement add relay
-                              },
+                        onTap: _isEditMode ? null : _showAddRelaySheet,
                         borderRadius: BorderRadius.circular(20.r),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
